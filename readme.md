@@ -31,7 +31,7 @@ Crea un archivo .env en la raíz de tu proyecto y añade las siguientes claves:
 RECURRENTE_BASE_URL=https://app.recurrente.com
 RECURRENTE_PUBLIC_KEY=tu-public-key
 RECURRENTE_SECRET_KEY=tu-secret-key
-SVIX_SIGNING_SECRET=tu-svix-signing-key
+RECURRENTE_SVIX_SIGNING_SECRET=tu-svix-signing-key
 ```
 
 ## Ejemplos de Uso
