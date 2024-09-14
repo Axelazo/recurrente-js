@@ -28,7 +28,7 @@ Instala el paquete directamente desde npm o yarn.
 Crea un archivo .env en la raíz de tu proyecto y añade las siguientes claves:
 
 ```
-BASE_URL=https://app.recurrente.com
+RECURRENTE_BASE_URL=https://app.recurrente.com
 RECURRENTE_PUBLIC_KEY=tu-public-key
 RECURRENTE_SECRET_KEY=tu-secret-key
 SVIX_SIGNING_SECRET=tu-svix-signing-key
@@ -198,10 +198,9 @@ app.post('/webhook', (req, res) => {
   try {
     const payload = JSON.stringify(req.body);
     const headers = req.headers;
-    const signingSecret = process.env.SVIX_SIGNING_SECRET as string;
 
     // Verificar la firma y obtener el evento
-    const event = verifySvixSignature(payload, headers, signingSecret);
+    const event = verifySvixSignature(payload, headers);
 
     // Procesar el evento
     handleWebhookEvent(event);
@@ -300,7 +299,7 @@ app.post('/webhook', (req, res) => {
   const headers = req.headers;
 
   try {
-    const event = verifySvixSignature(payload, headers, process.env.SVIX_SIGNING_SECRET!);
+    const event = verifySvixSignature(payload, headers);
     handleWebhookEvent(event);
     res.status(200).send('Webhook procesado');
   } catch (error) {
