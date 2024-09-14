@@ -1,0 +1,45 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment Variables
+.env
+
+# Typescript compiled output
+*.tsbuildinfo
+dist/
+build/
+
+# Test output
+coverage/
+*.lcov
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+lerna-debug.log*
+
+# Jest
+/jest.config.js
+/jest/
+
+# Package lock files
+package-lock.json
+yarn.lock
+
+# Editor specific files
+.idea/
+.vscode/
+*.swp
+
+# Mac specific files
+.DS_Store
