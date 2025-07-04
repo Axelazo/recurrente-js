@@ -1426,6 +1426,77 @@ export interface SubscriptionCancel {
 }
 
 /**
+ * Represents the payload for creating a checkout session.
+ */
+export interface CreateCheckoutRequest {
+  /**
+   * An array of items to be included in the checkout.
+   * Each item can be defined by its product_id or by its details.
+   * @required
+   */
+  items: {
+    /**
+     * The ID of a pre-existing product. Use this to create a checkout for a master plan.
+     * @optional
+     */
+    productId?: string;
+
+    // You can also include fields for dynamic products if you want to support both methods
+    // name?: string;
+    // amountInCents?: number;
+    // ...etc
+  }[];
+
+  /**
+   * URL to redirect the user after a successful transaction.
+   * @optional
+   */
+  successUrl?: string;
+
+  /**
+   * URL to redirect the user after canceling the transaction.
+   * @optional
+   */
+  cancelUrl?: string;
+
+  /**
+   * The ID of the user to whom the checkout belongs.
+   * Pre-populates user information fields.
+   * @optional
+   */
+  userId?: string;
+
+  /**
+   * Optional metadata for additional information.
+   * @optional
+   */
+  metadata?: Record<string, any>;
+
+  /**
+   * Optional expiration date for the checkout in ISO 8601 format.
+   * @optional
+   */
+  expiresAt?: string;
+}
+
+/**
+ * Represents the response after creating a checkout session.
+ */
+export interface CreateCheckoutResponse {
+  /**
+   * The unique identifier for the checkout session (e.g., "ch_...").
+   * @required
+   */
+  id: string;
+
+  /**
+   * The URL to which you should redirect your user to complete the payment.
+   * @required
+   */
+  checkoutUrl: string;
+}
+
+/**
  * Represents the possible webhook events that can be triggered in the Recurrente system.
  * These events correspond to various stages of the payment or subscription lifecycle.
  */

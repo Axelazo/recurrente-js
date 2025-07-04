@@ -10,8 +10,40 @@ import {
   GetProductResponse,
   GetAllProductsResponse,
   UpdateProductRequest,
+  CreateCheckoutRequest,
+  CreateCheckoutResponse,
 } from '../types/globals';
 import {toSnakeCase, toCamelCase} from '../utils/conversion';
+
+// TODO: Implement namespaces
+
+/**
+ * Creates a new checkout session.
+ *
+ * This function takes checkout data, including items (by product_id or details),
+ * converts it to snake_case, and sends it to the API to create a new checkout session.
+ * It returns the checkout ID and the URL for redirection.
+ *
+ * @param {CreateCheckoutRequest} checkoutData - The details for the checkout session.
+ * @returns {Promise<CreateCheckoutResponse>} The response containing the checkout ID and URL.
+ * @throws {ErrorResponse} Throws an error if the checkout creation fails.
+ */
+const createCheckout = async (
+  checkoutData: CreateCheckoutRequest
+): Promise<CreateCheckoutResponse> => {
+  try {
+    const checkoutDataInSnakeCase = toSnakeCase(checkoutData);
+
+    const response = await client.post<CreateCheckoutResponse>(
+      '/checkouts/',
+      checkoutDataInSnakeCase
+    );
+
+    return toCamelCase(response.data);
+  } catch (error: unknown) {
+    throw handleAxiosError(error);
+  }
+};
 
 /**
  * Creates a new product with a one-time payment.
@@ -390,6 +422,18 @@ const recurrente = {
    * @see getSubscription
    */
   getSubscription,
+
+  /**
+   * Creates a new checkout session.
+   *
+   * @function
+   * @memberof recurrente.checkouts
+   * @see createCheckout
+   * @param {CreateCheckoutRequest} checkoutData - The details for the checkout session.
+   * @returns {Promise<CreateCheckoutResponse>} A promise that resolves with the checkout ID and URL.
+   * @throws {ErrorResponse} Throws an error if the checkout creation fails.
+   */
+  createCheckout,
 };
 
 export default recurrente;
