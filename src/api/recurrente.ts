@@ -12,10 +12,10 @@ import {
   UpdateProductRequest,
   CreateCheckoutRequest,
   CreateCheckoutResponse,
+  CreateRefundRequest,
+  CreateRefundResponse,
 } from '../types/globals';
 import {toSnakeCase, toCamelCase} from '../utils/conversion';
-
-// TODO: Implement namespaces
 
 /**
  * Creates a new checkout session.
@@ -294,6 +294,33 @@ const test = async (): Promise<{message: string}> => {
 };
 
 /**
+ * Creates a new refund for a specific payment intent.
+ *
+ * This function takes a payment_intent_id, converts the payload to snake_case,
+ * and sends it to the API to process a refund.
+ *
+ * @param {CreateRefundRequest} refundData - The data containing the paymentIntentId to refund.
+ * @returns {Promise<CreateRefundResponse>} The response containing the details of the created refund.
+ * @throws {ErrorResponse} Throws an error if the refund creation fails.
+ */
+const createRefund = async (
+  refundData: CreateRefundRequest
+): Promise<CreateRefundResponse> => {
+  try {
+    const refundDataInSnakeCase = toSnakeCase(refundData);
+
+    const response = await client.post<CreateRefundResponse>(
+      '/refunds/',
+      refundDataInSnakeCase
+    );
+
+    return toCamelCase(response.data);
+  } catch (error: unknown) {
+    throw handleAxiosError(error);
+  }
+};
+
+/**
  * Recurrente API utility for managing product subscriptions, cancellations, and product deletions.
  *
  * The `recurrente` object provides methods to create, cancel, retrieve, and delete subscriptions and products,
@@ -309,6 +336,8 @@ const test = async (): Promise<{message: string}> => {
  * @property {Function} createSubscription - Creates a new subscription for a product.
  * @property {Function} cancelSubscription - Cancels an existing subscription by its ID.
  * @property {Function} getSubscription - Retrieves details of a specific subscription by its ID.
+ * @property {Function} createCheckout - Creates a new checkout with provided product ID.
+ * @property {Function} createRefund - Creates a new refund for a specific payment intent.
  */
 const recurrente = {
   /**
@@ -434,6 +463,17 @@ const recurrente = {
    * @throws {ErrorResponse} Throws an error if the checkout creation fails.
    */
   createCheckout,
+  /**
+   * Creates a new refund for a specific payment intent.
+   *
+   * @function
+   * @memberof recurrente
+   * @see createRefund
+   * @param {CreateRefundRequest} refundData - The data containing the paymentIntentId to refund.
+   * @returns {Promise<CreateRefundResponse>} A promise that resolves with the refund details.
+   * @throws {ErrorResponse} Throws an error if the refund creation fails.
+   */
+  createRefund,
 };
 
 export default recurrente;

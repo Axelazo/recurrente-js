@@ -1516,3 +1516,65 @@ export type RecurrenteWebhookEvent =
  * @param event - The webhook event object.
  */
 export type WebhookHandler<T> = (event: T) => void;
+
+/**
+ * Represents the payload for creating a refund.
+ */
+export interface CreateRefundRequest {
+  /**
+   * The ID of the payment intent (`pa_...`) to be refunded.
+   * @required
+   */
+  paymentIntentId: string;
+}
+
+/**
+ * Represents the response after successfully creating a refund.
+ */
+export interface CreateRefundResponse {
+  /**
+   * The unique identifier for the refund object (e.g., "re_...").
+   * @required
+   */
+  id: string;
+
+  /**
+   * The status of the refund.
+   * @required
+   */
+  status: 'succeeded' | 'pending' | 'failed'; // Assuming possible values
+
+  /**
+   * The customer associated with the refunded payment.
+   * @required
+   */
+  customer: {
+    id: string;
+    email: string;
+    fullName: string;
+  };
+
+  /**
+   * The amount in cents that was refunded to your account balance.
+   * @required
+   */
+  accountRefundedAmountInCents: number;
+
+  /**
+   * The amount in cents that was refunded to the customer.
+   * @required
+   */
+  customerRefundedAmountInCents: number;
+
+  /**
+   * The currency of the refund.
+   * @required
+   */
+  currency: string;
+
+  /**
+   * The timestamp of when the refund was created.
+   * @required
+   */
+  createdAt: string; // ISO date string
+}
