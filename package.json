@@ -1,6 +1,6 @@
 {
   "name": "recurrente-js",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -26,8 +26,7 @@
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run lint",
-    "context": "ts-node scripts/generate-context.cts"
+    "posttest": "npm run lint"
   },
   "author": "Axel Aguilar",
   "license": "MIT",
