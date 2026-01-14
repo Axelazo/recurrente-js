@@ -1,15 +1,22 @@
 {
   "name": "recurrente-js",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "./dist/index.js",
-  "types": "./dist/globals.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./webhooks": "./dist/webhooks.js"
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./webhooks": {
+      "import": "./dist/webhooks.js",
+      "require": "./dist/webhooks.js",
+      "types": "./dist/webhooks.d.ts"
+    }
   },
   "files": [
-    "dist/**/*",
-    "src/**/*.d.ts"
+    "dist/**/*"
   ],
   "scripts": {
     "test": "jest",
@@ -17,10 +24,9 @@
     "clean": "gts clean",
     "compile": "tsc",
     "fix": "gts fix",
-    "prepare": "npm.cmd run compile",
-    "pretest": "npm.cmd run compile",
-    "posttest": "npm.cmd run lint",
-    "dev": "nodemon -w *.ts -e ts -x ts-node --files -H -T ./src/index.ts",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run lint",
     "context": "ts-node scripts/generate-context.cts"
   },
   "author": "Axel Aguilar",
@@ -42,3 +48,5 @@
     "svix": "^1.34.0"
   }
 }
+
+
