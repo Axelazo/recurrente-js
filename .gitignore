@@ -43,3 +43,6 @@ yarn.lock
 
 # Mac specific files
 .DS_Store
+
+# Context
+ai-context/

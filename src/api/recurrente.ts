@@ -1,5 +1,6 @@
 import axios from 'axios';
-import client from '../config/axiosInstance';
+// CHANGED: We now import the factory function instead of the direct instance.
+import { getClient } from '../config/axiosInstance';
 import {
   ProductSubscription,
   CreateSubscriptionResponse,
@@ -10,40 +11,8 @@ import {
   GetProductResponse,
   GetAllProductsResponse,
   UpdateProductRequest,
-  CreateCheckoutRequest,
-  CreateCheckoutResponse,
-  CreateRefundRequest,
-  CreateRefundResponse,
 } from '../types/globals';
-import {toSnakeCase, toCamelCase} from '../utils/conversion';
-
-/**
- * Creates a new checkout session.
- *
- * This function takes checkout data, including items (by product_id or details),
- * converts it to snake_case, and sends it to the API to create a new checkout session.
- * It returns the checkout ID and the URL for redirection.
- *
- * @param {CreateCheckoutRequest} checkoutData - The details for the checkout session.
- * @returns {Promise<CreateCheckoutResponse>} The response containing the checkout ID and URL.
- * @throws {ErrorResponse} Throws an error if the checkout creation fails.
- */
-const createCheckout = async (
-  checkoutData: CreateCheckoutRequest
-): Promise<CreateCheckoutResponse> => {
-  try {
-    const checkoutDataInSnakeCase = toSnakeCase(checkoutData);
-
-    const response = await client.post<CreateCheckoutResponse>(
-      '/checkouts/',
-      checkoutDataInSnakeCase
-    );
-
-    return toCamelCase(response.data);
-  } catch (error: unknown) {
-    throw handleAxiosError(error);
-  }
-};
+import { toSnakeCase, toCamelCase } from '../utils/conversion';
 
 /**
  * Creates a new product with a one-time payment.
@@ -60,6 +29,7 @@ const createProduct = async (
   productData: CreateProductRequest
 ): Promise<CreateProductResponse> => {
   try {
+    const client = getClient(); // <-- Get client instance at runtime
     const productDataInSnakeCase = toSnakeCase(productData);
 
     const response = await client.post<CreateProductResponse>(
@@ -86,6 +56,7 @@ const createProduct = async (
  */
 const getProduct = async (productId: string): Promise<GetProductResponse> => {
   try {
+    const client = getClient(); // <-- Get client instance at runtime
     const response = await client.get<GetProductResponse>(
       `/products/${productId}`
     );
@@ -108,6 +79,7 @@ const getProduct = async (productId: string): Promise<GetProductResponse> => {
  */
 const getAllProducts = async (page = 1): Promise<GetAllProductsResponse> => {
   try {
+    const client = getClient(); // <-- Get client instance at runtime
     const response = await client.get<GetAllProductsResponse>(
       `/products?page=${page}`
     );
@@ -134,6 +106,7 @@ const updateProduct = async (
   productData: UpdateProductRequest
 ): Promise<GetProductResponse> => {
   try {
+    const client = getClient(); // <-- Get client instance at runtime
     const productDataInSnakeCase = toSnakeCase(productData);
 
     const response = await client.patch<GetProductResponse>(
@@ -162,6 +135,7 @@ const createSubscription = async (
   productData: ProductSubscription
 ): Promise<CreateSubscriptionResponse> => {
   try {
+    const client = getClient(); // <-- Get client instance at runtime
     const productDataInSnakeCase = toSnakeCase(productData);
 
     const response = await client.post<CreateSubscriptionResponse>(
@@ -188,8 +162,9 @@ const createSubscription = async (
  */
 const cancelSubscription = async (
   subscriptionId: string
-): Promise<{message: string}> => {
+): Promise<{ message: string }> => {
   try {
+    const client = getClient(); // <-- Get client instance at runtime
     const response = await client.delete(`/subscriptions/${subscriptionId}`);
     return {
       message: `Subscription canceled successfully. Status: ${response.status}`,
@@ -209,11 +184,12 @@ const cancelSubscription = async (
  * @returns {Promise<{message: string}>} A message indicating whether the product was deleted successfully.
  * @throws {ErrorResponse} Throws an error if the deletion fails.
  */
-const deleteProduct = async (productId: string): Promise<{message: string}> => {
+const deleteProduct = async (productId: string): Promise<{ message: string }> => {
   try {
+    const client = getClient(); // <-- Get client instance at runtime
     await client.delete(`/products/${productId}`);
 
-    return {message: 'Product deleted successfully'};
+    return { message: 'Product deleted successfully' };
   } catch (error: unknown) {
     throw handleAxiosError(error);
   }
@@ -233,6 +209,7 @@ const getSubscription = async (
   subscriptionId: string
 ): Promise<SubscriptionStatusResponse> => {
   try {
+    const client = getClient(); // <-- Get client instance at runtime
     const response = await client.get<SubscriptionStatusResponse>(
       `/subscriptions/${subscriptionId}`
     );
@@ -282,39 +259,13 @@ function handleAxiosError(error: unknown): ErrorResponse {
  * @returns {Promise<{message: string}>} A message indicating success or failure of the request.
  * @throws {ErrorResponse} Throws an error if the request fails.
  */
-const test = async (): Promise<{message: string}> => {
+const test = async (): Promise<{ message: string }> => {
   try {
+    const client = getClient(); // <-- Get client instance at runtime
     const response = await client.get<Record<string, string>>('/test');
     return {
       message: `Test request succeeded. Status: ${response.data.message}`,
     };
-  } catch (error: unknown) {
-    throw handleAxiosError(error);
-  }
-};
-
-/**
- * Creates a new refund for a specific payment intent.
- *
- * This function takes a payment_intent_id, converts the payload to snake_case,
- * and sends it to the API to process a refund.
- *
- * @param {CreateRefundRequest} refundData - The data containing the paymentIntentId to refund.
- * @returns {Promise<CreateRefundResponse>} The response containing the details of the created refund.
- * @throws {ErrorResponse} Throws an error if the refund creation fails.
- */
-const createRefund = async (
-  refundData: CreateRefundRequest
-): Promise<CreateRefundResponse> => {
-  try {
-    const refundDataInSnakeCase = toSnakeCase(refundData);
-
-    const response = await client.post<CreateRefundResponse>(
-      '/refunds/',
-      refundDataInSnakeCase
-    );
-
-    return toCamelCase(response.data);
   } catch (error: unknown) {
     throw handleAxiosError(error);
   }
@@ -336,8 +287,6 @@ const createRefund = async (
  * @property {Function} createSubscription - Creates a new subscription for a product.
  * @property {Function} cancelSubscription - Cancels an existing subscription by its ID.
  * @property {Function} getSubscription - Retrieves details of a specific subscription by its ID.
- * @property {Function} createCheckout - Creates a new checkout with provided product ID.
- * @property {Function} createRefund - Creates a new refund for a specific payment intent.
  */
 const recurrente = {
   /**
@@ -451,29 +400,6 @@ const recurrente = {
    * @see getSubscription
    */
   getSubscription,
-
-  /**
-   * Creates a new checkout session.
-   *
-   * @function
-   * @memberof recurrente.checkouts
-   * @see createCheckout
-   * @param {CreateCheckoutRequest} checkoutData - The details for the checkout session.
-   * @returns {Promise<CreateCheckoutResponse>} A promise that resolves with the checkout ID and URL.
-   * @throws {ErrorResponse} Throws an error if the checkout creation fails.
-   */
-  createCheckout,
-  /**
-   * Creates a new refund for a specific payment intent.
-   *
-   * @function
-   * @memberof recurrente
-   * @see createRefund
-   * @param {CreateRefundRequest} refundData - The data containing the paymentIntentId to refund.
-   * @returns {Promise<CreateRefundResponse>} A promise that resolves with the refund details.
-   * @throws {ErrorResponse} Throws an error if the refund creation fails.
-   */
-  createRefund,
 };
 
 export default recurrente;

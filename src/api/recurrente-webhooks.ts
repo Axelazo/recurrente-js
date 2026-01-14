@@ -9,10 +9,6 @@ import {
   RecurrenteWebhookEvent,
 } from '../types/globals';
 import {toCamelCase} from '../utils/conversion';
-import dotenv from 'dotenv';
-
-// Load environment variables from .env file if they are not already set
-dotenv.config();
 
 /**
  * A handler function type definition.

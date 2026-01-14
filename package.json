@@ -1,6 +1,6 @@
 {
   "name": "recurrente-js",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "./dist/index.js",
   "types": "./dist/globals.d.ts",
   "exports": {
@@ -20,7 +20,8 @@
     "prepare": "npm.cmd run compile",
     "pretest": "npm.cmd run compile",
     "posttest": "npm.cmd run lint",
-    "dev": "nodemon -w *.ts -e ts -x ts-node --files -H -T ./src/index.ts"
+    "dev": "nodemon -w *.ts -e ts -x ts-node --files -H -T ./src/index.ts",
+    "context": "ts-node scripts/generate-context.cts"
   },
   "author": "Axel Aguilar",
   "license": "MIT",
