@@ -11,6 +11,8 @@ import {
   GetProductResponse,
   GetAllProductsResponse,
   UpdateProductRequest,
+  CreateCheckoutRequest,
+  CreateCheckoutResponse,
 } from '../types/globals';
 import { toSnakeCase, toCamelCase } from '../utils/conversion';
 
@@ -252,6 +254,32 @@ function handleAxiosError(error: unknown): ErrorResponse {
 }
 
 /**
+ * Creates a new checkout session for pre-existing products.
+ *
+ * @param {CreateCheckoutRequest} checkoutData - The checkout details.
+ * @returns {Promise<CreateCheckoutResponse>} The response containing the checkout URL.
+ * @throws {ErrorResponse} Throws an error if the checkout creation fails.
+ */
+const createCheckout = async (
+  checkoutData: CreateCheckoutRequest
+): Promise<CreateCheckoutResponse> => {
+  try {
+    const client = getClient(); // Use the factory
+    const checkoutDataInSnakeCase = toSnakeCase(checkoutData);
+
+    const response = await client.post<CreateCheckoutResponse>(
+      '/checkouts/',
+      checkoutDataInSnakeCase
+    );
+
+    return toCamelCase(response.data);
+  } catch (error: unknown) {
+    throw handleAxiosError(error);
+  }
+};
+
+
+/**
  * Makes a GET request to the '/test' endpoint.
  *
  * This function is not exported and is intended for internal use.
@@ -400,6 +428,21 @@ const recurrente = {
    * @see getSubscription
    */
   getSubscription,
+    /**
+   * Creates a new checkout session for pre-existing products.
+   *
+   * This function takes checkout data, including items referencing product IDs,
+   * and sends it to the API to create a new checkout session. It returns the
+   * checkout ID and the URL for user redirection.
+   *
+   * @function
+   * @memberof recurrente
+   * @see createCheckout
+   * @param {CreateCheckoutRequest} checkoutData - The details for the checkout session, including items and redirect URLs.
+   * @returns {Promise<CreateCheckoutResponse>} A promise that resolves with the checkout ID and URL.
+   * @throws {ErrorResponse} Throws an error if the checkout creation fails.
+   */
+  createCheckout
 };
 
 export default recurrente;
