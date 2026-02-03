@@ -13,6 +13,9 @@ import {
   UpdateProductRequest,
   CreateCheckoutRequest,
   CreateCheckoutResponse,
+  Checkout,
+  UpdateCheckoutRequest,
+  GetCheckoutsParams,
 } from '../types/globals';
 import { toSnakeCase, toCamelCase } from '../utils/conversion';
 
@@ -257,14 +260,14 @@ function handleAxiosError(error: unknown): ErrorResponse {
  * Creates a new checkout session for pre-existing products.
  *
  * @param {CreateCheckoutRequest} checkoutData - The checkout details.
- * @returns {Promise<CreateCheckoutResponse>} The response containing the checkout URL.
+ * @returns {Promise<CreateCheckoutResponse>} The response containing the checkout URL and details.
  * @throws {ErrorResponse} Throws an error if the checkout creation fails.
  */
 const createCheckout = async (
   checkoutData: CreateCheckoutRequest
 ): Promise<CreateCheckoutResponse> => {
   try {
-    const client = getClient(); // Use the factory
+    const client = getClient();
     const checkoutDataInSnakeCase = toSnakeCase(checkoutData);
 
     const response = await client.post<CreateCheckoutResponse>(
@@ -278,6 +281,76 @@ const createCheckout = async (
   }
 };
 
+/**
+ * Retrieves details of a specific checkout by its ID.
+ *
+ * @param {string} checkoutId - The ID of the checkout to retrieve.
+ * @returns {Promise<Checkout>} The details of the checkout.
+ * @throws {ErrorResponse} Throws an error if the retrieval fails.
+ */
+const getCheckout = async (checkoutId: string): Promise<Checkout> => {
+  try {
+    const client = getClient();
+    const response = await client.get<Checkout>(`/checkouts/${checkoutId}`);
+    return toCamelCase(response.data);
+  } catch (error: unknown) {
+    throw handleAxiosError(error);
+  }
+};
+
+/**
+ * Updates an existing checkout by its ID.
+ * Note: Only unpaid checkouts can be updated.
+ *
+ * @param {string} checkoutId - The ID of the checkout to update.
+ * @param {UpdateCheckoutRequest} updateData - The data to update (urls, metadata, expiration).
+ * @returns {Promise<Checkout>} The updated checkout details.
+ * @throws {ErrorResponse} Throws an error if the update fails.
+ */
+const updateCheckout = async (
+  checkoutId: string,
+  updateData: UpdateCheckoutRequest
+): Promise<Checkout> => {
+  try {
+    const client = getClient();
+    const updateDataInSnakeCase = toSnakeCase(updateData);
+
+    const response = await client.patch<Checkout>(
+      `/checkouts/${checkoutId}`,
+      updateDataInSnakeCase
+    );
+
+    return toCamelCase(response.data);
+  } catch (error: unknown) {
+    throw handleAxiosError(error);
+  }
+};
+
+/**
+ * Retrieves a paginated list of checkouts.
+ *
+ * @param {GetCheckoutsParams} params - Filtering and pagination options.
+ * @returns {Promise<Checkout[]>} An array of checkout objects.
+ * @throws {ErrorResponse} Throws an error if the retrieval fails.
+ */
+const getAllCheckouts = async (
+  params: GetCheckoutsParams = {}
+): Promise<Checkout[]> => {
+  try {
+    const client = getClient();
+    // Convert params to snake_case for the query string
+    const paramsInSnakeCase = toSnakeCase(params);
+    
+    // Axios handles query param serialization
+    const response = await client.get<Checkout[]>('/checkouts', {
+      params: paramsInSnakeCase,
+    });
+
+    return toCamelCase(response.data);
+  } catch (error: unknown) {
+    throw handleAxiosError(error);
+  }
+};
 
 /**
  * Makes a GET request to the '/test' endpoint.
@@ -315,6 +388,11 @@ const test = async (): Promise<{ message: string }> => {
  * @property {Function} createSubscription - Creates a new subscription for a product.
  * @property {Function} cancelSubscription - Cancels an existing subscription by its ID.
  * @property {Function} getSubscription - Retrieves details of a specific subscription by its ID.
+ * @property {Function} createCheckout - Creates a new checkout session.
+ * @property {Function} getCheckout - Retrieves a checkout by its ID.
+ * @property {Function} getCheckouts - Retrieves a paginated list of checkouts using filters.
+ * @property {Function} updateCheckout - Updates an existing checkout (URLs, metadata, expiration).
+ * @property {Function} expireCheckout - Expires a checkout immediately.
  */
 const recurrente = {
   /**
@@ -442,7 +520,52 @@ const recurrente = {
    * @returns {Promise<CreateCheckoutResponse>} A promise that resolves with the checkout ID and URL.
    * @throws {ErrorResponse} Throws an error if the checkout creation fails.
    */
-  createCheckout
+  createCheckout,
+  /**
+   * Retrieves details of a specific checkout by its ID.
+   *
+   * This function fetches the current state of a checkout, including
+   * payment status, totals, and redirect URLs.
+   *
+   * @function
+   * @memberof recurrente
+   * @see getCheckout
+   * @param {string} checkoutId - The ID of the checkout to retrieve.
+   * @returns {Promise<Checkout>} A promise that resolves with the checkout details.
+   * @throws {ErrorResponse} Throws an error if the retrieval fails.
+   */
+  getCheckout,
+
+  /**
+   * Updates an existing checkout by its ID.
+   *
+   * Only unpaid checkouts can be updated. This method allows updating
+   * redirect URLs, metadata, and expiration time.
+   *
+   * @function
+   * @memberof recurrente
+   * @see updateCheckout
+   * @param {string} checkoutId - The ID of the checkout to update.
+   * @param {UpdateCheckoutRequest} updateData - The data to update.
+   * @returns {Promise<Checkout>} A promise that resolves with the updated checkout.
+   * @throws {ErrorResponse} Throws an error if the update fails.
+   */
+  updateCheckout,
+
+  /**
+   * Retrieves a paginated list of checkouts.
+   *
+   * Supports filtering by time range, user, and pagination options.
+   *
+   * @function
+   * @memberof recurrente
+   * @see getAllCheckouts
+   * @param {GetCheckoutsParams} [params] - Filtering and pagination options.
+   * @returns {Promise<Checkout[]>} A promise that resolves with an array of checkouts.
+   * @throws {ErrorResponse} Throws an error if the retrieval fails.
+   */
+  getAllCheckouts,
+
 };
 
 export default recurrente;

@@ -46,3 +46,6 @@ yarn.lock
 
 # Context
 ai-context/
+
+# Scripts
+scripts/

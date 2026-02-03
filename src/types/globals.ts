@@ -1509,6 +1509,170 @@ export interface CreateRefundResponse {
 }
 
 /**
+ * Represents a Checkout object returned by the API.
+ * A checkout encapsulates the payment session lifecycle, payment method,
+ * and related metadata.
+ */
+export interface Checkout {
+  /**
+   * Unique identifier for the checkout (e.g., "ch_...").
+   */
+  id: string;
+
+  /**
+   * Current status of the checkout.
+   * - 'paid': The checkout was successfully paid.
+   * - 'unpaid': The checkout has not been paid yet.
+   * - 'expired': The checkout expired before payment.
+   */
+  status: 'paid' | 'unpaid' | 'expired';
+
+  /**
+   * Payment information associated with the checkout.
+   * Null if no payment has been attempted or completed.
+   */
+  payment: {
+    /**
+     * Unique identifier for the payment.
+     */
+    id: string;
+
+    /**
+     * The entity being paid (e.g., Subscription or OneTimePayment).
+     */
+    paymentable: {
+      /**
+       * Type of the paymentable entity.
+       */
+      type: string;
+
+      /**
+       * Unique identifier of the paymentable entity.
+       */
+      id: string;
+
+      /**
+       * Name of the applied tax, if any.
+       */
+      taxName: string | null;
+
+      /**
+       * Tax identification number, if applicable.
+       */
+      taxId: string | null;
+    };
+  } | null;
+
+  /**
+   * Payment method used in the checkout.
+   * Null if no payment method has been attached.
+   */
+  paymentMethod: {
+    /**
+     * Unique identifier for the payment method.
+     */
+    id: string;
+
+    /**
+     * Type of payment method (e.g., 'card').
+     */
+    type: string;
+
+    /**
+     * Card details, present only if the payment method is a card.
+     */
+    card?: {
+      /**
+       * Last four digits of the card number.
+       */
+      last4: string;
+
+      /**
+       * Card network (e.g., 'visa', 'mastercard').
+       */
+      network: string;
+    };
+  } | null;
+
+  /**
+   * Transfer setups associated with the checkout.
+   * Used for split payments or transfers when applicable.
+   */
+  transferSetups: any[];
+
+  /**
+   * Custom metadata associated with the checkout.
+   */
+  metadata: Record<string, any>;
+
+  /**
+   * Expiration date of the checkout session, if defined.
+   * Represented as an ISO 8601 string.
+   */
+  expiresAt?: string;
+
+  /**
+   * URL to redirect the user after a successful payment.
+   */
+  successUrl: string;
+
+  /**
+   * URL to redirect the user after canceling the checkout.
+   */
+  cancelUrl: string;
+
+  /**
+   * Date and time when the checkout was created.
+   * Represented as an ISO 8601 string.
+   */
+  createdAt: string;
+
+  /**
+   * Total amount to be paid in cents.
+   * May be returned as a string or number depending on the API.
+   */
+  totalInCents: number | string;
+
+  /**
+   * Currency of the checkout total (e.g., 'GTQ', 'USD').
+   */
+  currency: string;
+
+  /**
+   * Latest payment intent associated with this checkout.
+   * Null if no intent has been created.
+   */
+  latestIntent: {
+    /**
+     * Unique identifier for the intent.
+     */
+    id: string;
+
+    /**
+     * Date and time when the intent was created.
+     * Represented as an ISO 8601 string.
+     */
+    createdAt: string;
+
+    /**
+     * Type of intent (e.g., 'payment_intent').
+     */
+    type: string;
+
+    /**
+     * Raw intent data returned by the API.
+     */
+    data: Record<string, any>;
+  } | null;
+
+  /**
+   * Public URL where the customer can complete the checkout.
+   * Usually returned on checkout creation.
+   */
+  checkoutUrl?: string;
+}
+
+/**
  * Represents the payload for creating a checkout session.
  */
 export interface CreateCheckoutRequest {
@@ -1551,17 +1715,74 @@ export interface CreateCheckoutRequest {
 }
 
 /**
- * Represents the response after creating a checkout session.
+ * Represents the payload for updating an existing checkout.
+ * Only the provided fields will be updated.
  */
-export interface CreateCheckoutResponse {
+export interface UpdateCheckoutRequest {
   /**
+   * URL to redirect the user after a successful payment.
+   */
+  successUrl?: string;
+
+  /**
+   * URL to redirect the user if the checkout is canceled.
+   */
+  cancelUrl?: string;
+
+  /**
+   * Custom metadata associated with the checkout.
+   * Can be used to store application-specific information.
+   */
+  metadata?: Record<string, any>;
+
+  /**
+   * Expiration date for the checkout session.
+   * Must be an ISO 8601 formatted date string.
+   */
+  expiresAt?: string;
+}
+
+/**
+ * Parameters used to filter and paginate checkout listings.
+ */
+export interface GetCheckoutsParams {
+  /**
+   * Start of the time range to filter checkouts.
+   * Represented as an ISO 8601 date string.
+   */
+  fromTime?: string;
+
+  /**
+   * End of the time range to filter checkouts.
+   * Represented as an ISO 8601 date string.
+   */
+  untilTime?: string;
+
+  /**
+   * Filter checkouts by a specific user ID.
+   */
+  userId?: string;
+
+  /**
+   * Page number for pagination.
+   */
+  page?: number;
+
+  /**
+   * Number of items to return per page.
+   */
+  items?: number;
+}
+
+
+/**
+ * Represents the response after creating a checkout session.
+ * The API returns the full checkout object plus the checkoutUrl.
+ */
+export interface CreateCheckoutResponse extends Checkout {
+    /**
    * The unique URL for the checkout session that the user should be redirected to.
    * @required
    */
   checkoutUrl: string;
-  /**
-   * Unique identifier for the created checkout session (e.g., "ch_...").
-   * @required
-   */
-  id: string;
 }
